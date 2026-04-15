@@ -16,7 +16,7 @@ A Pinokio launcher for the official [kyutai-labs/ovie](https://github.com/kyutai
 2. Click `Start`.
 3. Wait for Pinokio to switch to `Open Web UI`.
 4. Upload an image or use the bundled sample image.
-5. Adjust `Yaw`, `Pitch`, and `Distance`. Releasing any slider automatically renders the new view.
+5. Choose `Safe` or `Experimental`, then adjust `Yaw`, `Pitch`, and `Distance`. Releasing any slider automatically renders the new view.
 6. Use `Outputs` to browse saved renders.
 7. Use `Update` to pull the latest launcher and upstream repository changes.
 8. Use `Reset` to remove the cloned app and its installed environment.
@@ -75,6 +75,7 @@ curl -X POST "http://127.0.0.1:<PORT>/gradio_api/call/generate_view" \
 - The first inference may take a while because the launcher downloads `kyutai/ovie` from Hugging Face and warms the model.
 - The launcher prefers `CUDA`, then `MPS` on Apple Silicon, then `CPU`. If an `MPS`-specific runtime error occurs during inference, it retries on `CPU`.
 - The camera controls map to the same translation recipe used by the original notebook example.
+- `Safe` keeps the sliders closer to OVIE's typical training-time viewpoint changes, while `Experimental` widens the bounds for stress testing.
 - The UI renders automatically on page load, on image changes, and whenever you release a camera slider.
 - The upstream training and preprocessing scripts in `app/` still include CUDA-specific paths and should be treated as NVIDIA-first.
 - The upstream repository still includes the original notebooks in `app/`, but the launcher now exposes a normal web UI by default.

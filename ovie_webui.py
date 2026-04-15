@@ -55,6 +55,20 @@ DEFAULT_CAMERA = {
     "distance": 2.4,
 }
 
+CAMERA_PRESETS = {
+    "Safe": {
+        "yaw": (-35.0, 35.0),
+        "pitch": (-20.0, 20.0),
+        "distance": (1.5, 3.0),
+    },
+    "Experimental": {
+        "yaw": (-90.0, 90.0),
+        "pitch": (-45.0, 45.0),
+        "distance": (0.75, 5.0),
+    },
+}
+DEFAULT_CAMERA_PRESET = "Safe"
+
 DEFAULT_STATUS = (
     "Ready. Release a slider to render a new view automatically. "
     "Uploading or resetting an image will also render. "
@@ -253,6 +267,39 @@ def restore_default_view():
     return yaw, pitch, distance
 
 
+def clamp(value: float, lower: float, upper: float) -> float:
+    return max(lower, min(value, upper))
+
+
+def apply_camera_preset(
+    preset_name: str,
+    yaw_deg: float,
+    pitch_deg: float,
+    distance: float,
+):
+    preset = CAMERA_PRESETS.get(preset_name, CAMERA_PRESETS[DEFAULT_CAMERA_PRESET])
+    yaw_min, yaw_max = preset["yaw"]
+    pitch_min, pitch_max = preset["pitch"]
+    distance_min, distance_max = preset["distance"]
+    return (
+        gr.update(
+            minimum=yaw_min,
+            maximum=yaw_max,
+            value=clamp(yaw_deg, yaw_min, yaw_max),
+        ),
+        gr.update(
+            minimum=pitch_min,
+            maximum=pitch_max,
+            value=clamp(pitch_deg, pitch_min, pitch_max),
+        ),
+        gr.update(
+            minimum=distance_min,
+            maximum=distance_max,
+            value=clamp(distance, distance_min, distance_max),
+        ),
+    )
+
+
 def build_camera_token(
     image_size: int,
     yaw_deg: float,
@@ -362,6 +409,7 @@ def generate_view_ui(
 
 
 def create_demo() -> gr.Blocks:
+    default_preset = CAMERA_PRESETS[DEFAULT_CAMERA_PRESET]
     with gr.Blocks(title="OVIE") as demo:
         with gr.Column(elem_classes=["page-shell"]):
             with gr.Row(equal_height=True):
@@ -378,30 +426,36 @@ def create_demo() -> gr.Blocks:
                             sample_button = gr.Button("Use Sample Image", variant="secondary")
                             reset_button = gr.Button("Reset Camera", variant="secondary")
                         gr.Markdown(
-                            "Release a slider to render. Uploading a new image or resetting the camera also renders automatically.",
+                            "Choose a range preset, then release a slider to render. Uploading a new image or resetting the camera also renders automatically.",
                             elem_classes=["panel-note"],
                         )
 
                     with gr.Group(elem_classes=["surface-panel", "control-panel"]):
+                        camera_preset = gr.Radio(
+                            choices=list(CAMERA_PRESETS),
+                            value=DEFAULT_CAMERA_PRESET,
+                            label="Range Preset",
+                            info="Safe stays closer to OVIE's typical viewpoints. Experimental widens the camera bounds for stress testing.",
+                        )
                         yaw = gr.Slider(
-                            minimum=-60,
-                            maximum=60,
+                            minimum=default_preset["yaw"][0],
+                            maximum=default_preset["yaw"][1],
                             value=DEFAULT_CAMERA["yaw"],
                             step=1,
                             label="Yaw",
                             info="Positive moves the camera left. Negative moves it right.",
                         )
                         pitch = gr.Slider(
-                            minimum=-30,
-                            maximum=30,
+                            minimum=default_preset["pitch"][0],
+                            maximum=default_preset["pitch"][1],
                             value=DEFAULT_CAMERA["pitch"],
                             step=1,
                             label="Pitch",
                             info="Positive moves the camera higher. Negative moves it lower.",
                         )
                         distance = gr.Slider(
-                            minimum=1.0,
-                            maximum=4.0,
+                            minimum=default_preset["distance"][0],
+                            maximum=default_preset["distance"][1],
                             value=DEFAULT_CAMERA["distance"],
                             step=0.05,
                             label="Distance",
@@ -449,6 +503,14 @@ def create_demo() -> gr.Blocks:
                 fn=load_sample_image,
                 inputs=[],
                 outputs=input_image,
+                queue=False,
+                api_visibility="private",
+            ).then(**generation_kwargs)
+
+            camera_preset.change(
+                fn=apply_camera_preset,
+                inputs=[camera_preset, yaw, pitch, distance],
+                outputs=[yaw, pitch, distance],
                 queue=False,
                 api_visibility="private",
             ).then(**generation_kwargs)
