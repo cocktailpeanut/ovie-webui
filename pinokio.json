@@ -1,0 +1,21 @@
+{
+  "links": [
+    {
+      "title": "OVIE",
+      "links": [
+        {
+          "title": "GitHub",
+          "value": "https://github.com/kyutai-labs/ovie"
+        },
+        {
+          "title": "Hugging Face",
+          "value": "https://huggingface.co/kyutai/ovie"
+        },
+        {
+          "title": "Paper",
+          "value": "https://arxiv.org/abs/2603.23488"
+        }
+      ]
+    }
+  ]
+}

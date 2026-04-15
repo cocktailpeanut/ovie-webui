@@ -1,0 +1,17 @@
+ENVIRONMENT
+node_modules
+venv
+.env
+.*
+!.gitignore
+~*
+/logs/
+/cache/
+/outputs/
+/__pycache__/
+/app/
+/AGENTS.md
+/CLAUDE.md
+/GEMINI.md
+/QWEN.md
+/SPEC.md
