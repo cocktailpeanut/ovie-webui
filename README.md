@@ -1,76 +1,29 @@
 # OVIE
 
-A Pinokio launcher for the official [kyutai-labs/ovie](https://github.com/kyutai-labs/ovie) repository.
+A Gradio Web UI for the official [kyutai-labs/ovie](https://github.com/kyutai-labs/ovie) repository.
 
-## What This Launcher Does
+![screenshot.png](screenshot.png)
 
-- Clones the upstream OVIE repository into `app/`
-- Installs the locked Python environment with `uv sync --frozen`
-- Launches a real local web UI instead of exposing a notebook
-- Downloads `kyutai/ovie` from Hugging Face automatically on first generate and caches it locally
-- Saves generated images into `outputs/`
+# 1-Click Install & Launch
 
-## How To Use
+Use https://pinokio.co
 
-1. Click `Install`.
-2. Click `Start`.
-3. Wait for Pinokio to switch to `Open Web UI`.
-4. Upload an image or use the bundled sample image.
-5. Choose `Safe` or `Experimental`, then adjust `Yaw`, `Pitch`, and `Distance`. Releasing any slider automatically renders the new view.
-6. Use `Outputs` to browse saved renders.
-7. Use `Update` to pull the latest launcher and upstream repository changes.
-8. Use `Reset` to remove the cloned app and its installed environment.
+# Manual Usage
 
-## Programmatic Access
+## Install
 
-The launcher web UI exposes the inference action as the Gradio endpoint `generate_view`.
-
-### JavaScript
-
-Use the Gradio JavaScript client against the running local app:
-
-```javascript
-import { Client, handle_file } from "@gradio/client";
-
-const client = await Client.connect("http://127.0.0.1:<PORT>/");
-const result = await client.predict("/generate_view", [
-  await handle_file("input.jpg"),
-  32,
-  12,
-  2.4
-]);
-console.log(result.data);
+```
+uv sync --frozen
 ```
 
-### Python
+## Usage
 
-Call the same endpoint from Python:
-
-```python
-from gradio_client import Client, handle_file
-
-client = Client("http://127.0.0.1:<PORT>/")
-result = client.predict(
-    handle_file("input.jpg"),
-    32,
-    12,
-    2.4,
-    api_name="/generate_view",
-)
-print(result)
+```
+uv run --project app python ovie_webui.py
 ```
 
-### Curl
 
-You can call the generated Gradio API directly:
-
-```bash
-curl -X POST "http://127.0.0.1:<PORT>/gradio_api/call/generate_view" \
-  -H "Content-Type: application/json" \
-  -d "{\"data\":[\"app/assets/sample_image.jpg\",32,12,2.4]}"
-```
-
-## Notes
+# Notes
 
 - The first inference may take a while because the launcher downloads `kyutai/ovie` from Hugging Face and warms the model.
 - The launcher prefers `CUDA`, then `MPS` on Apple Silicon, then `CPU`. If an `MPS`-specific runtime error occurs during inference, it retries on `CPU`.
