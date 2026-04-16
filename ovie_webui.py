@@ -481,6 +481,7 @@ def create_demo() -> gr.Blocks:
                 "fn": generate_view_ui,
                 "inputs": generation_inputs,
                 "outputs": generation_outputs,
+                "show_progress": "hidden",
                 "trigger_mode": "always_last",
                 "concurrency_limit": 1,
                 "concurrency_id": "generation",
